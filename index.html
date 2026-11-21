@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GTA VI: Leonida Quest Simulator</title>
+  <style>
+    :root {
+      --bg-dark: #11071f;
+      --bg-card: rgba(24, 12, 43, 0.88);
+      --pink: #ff2a85;
+      --orange: #ff7b39;
+      --gold: #ffce54;
+      --cyan: #00f0ff;
+      --purple: #7928ca;
+      --text-main: #ffffff;
+      --text-muted: #d8c7e8;
+      --success: #00e676;
+      --danger: #ff3b5c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255, 42, 133, 0.35), transparent 40%),
+        radial-gradient(circle at 80% 15%, rgba(255, 123, 57, 0.35), transparent 45%),
+        radial-gradient(circle at 50% 90%, rgba(0, 240, 255, 0.25), transparent 50%),
+        linear-gradient(160deg, #160929 0%, #2a0e3d 45%, #11071f 100%);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .palm-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(transparent 95%, rgba(255, 42, 133, 0.12) 96%),
+        linear-gradient(90deg, transparent 95%, rgba(0, 240, 255, 0.08) 96%);
+      background-size: 40px 40px;
+      z-index: 0;
+    }
+
+    .app-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 760px;
+      background: var(--bg-card);
+      border: 2px solid rgba(255, 42, 133, 0.55);
+      border-radius: 22px;
+      box-shadow: 0 0 35px rgba(255, 42, 133, 0.3), 0 0 70px rgba(255, 123, 57, 0.15);
+      padding: 26px;
+      backdrop-filter: blur(12px);
+    }
+
+    /* Top HUD */
+    .hud-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-vi {
+      background: linear-gradient(135deg, var(--pink), var(--orange));
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.1rem;
+      padding: 6px 12px;
+      border-radius: 10px;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(255, 42, 133, 0.5);
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #fff, var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hud-stats {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stars {
+      color: var(--gold);
+      letter-spacing: 2px;
+    }
+
+    .sound-btn {
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.85rem;
+      transition: 0.2s;
+    }
+
+    .sound-btn:hover {
+      background: var(--cyan);
+      color: #11071f;
+    }
+
+    /* Screens */
+    .screen {
+      display: none;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Start Screen */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(255, 42, 133, 0.25), rgba(255, 123, 57, 0.25)),
+                  url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 260"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%23ff2a85"/><stop offset="50%" stop-color="%23ff7b39"/><stop offset="100%" stop-color="%23ffce54"/></linearGradient></defs><circle cx="620" cy="140" r="85" fill="url(%23g)" opacity="0.85"/><path d="M0 210 Q200 180 400 205 T800 195 L800 260 L0 260 Z" fill="%2311071f"/><path d="M120 215 Q130 130 165 95 M130 140 Q100 125 85 145 M130 140 Q165 120 180 140 M130 120 Q105 95 90 110 M130 120 Q160 95 175 110" stroke="%2311071f" stroke-width="6" fill="none" stroke-linecap="round"/></svg>') center/cover no-repeat;
+      border-radius: 16px;
+      padding: 28px 24px;
+      border: 1px solid rgba(255, 206, 84, 0.35);
+      margin-bottom: 20px;
+    }
+
+    .hero-banner h1 {
+      font-size: 2rem;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      text-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+    }
+
+    .hero-banner p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.5;
+      max-width: 560px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .feature-box {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .feature-box strong {
+      display: block;
+      color: var(--gold);
+      margin-bottom: 4px;
+      font-size: 0.95rem;
+    }
+
+    .feature-box span {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      width: 100%;
+      padding: 15px 22px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #fff;
+      background: linear-gradient(90deg, var(--pink), var(--orange));
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(255, 42, 133, 0.45);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(255, 123, 57, 0.6);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    /* Progress & Mission Scene */
+    .progress-wrap {
+      margin-bottom: 16px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 20%;
+      background: linear-gradient(90deg, var(--cyan), var(--pink), var(--gold));
+      transition: width 0.4s ease;
+    }
+
+    .scene-box {
+      background: linear-gradient(135deg, rgba(121, 40, 202, 0.28), rgba(255, 42, 133, 0.18));
+      border-left: 4px solid var(--cyan);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    .scene-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--cyan);
+      margin-bottom: 6px;
+    }
+
+    .scene-story {
+      font-size: 0.95rem;
+      color: #f3e9ff;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    /* Interactive Mini-Fragment */
+    .interactive-pad {
+      background: rgba(17, 7, 31, 0.75);
+      border: 1px dashed rgba(255, 206, 84, 0.5);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .interactive-label {
+      font-size: 0.85rem;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .mini-action-btn {
+      background: linear-gradient(90deg, #00c6ff, #0072ff);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .mini-action-btn:hover {
+      filter: brightness(1.15);
+    }
+
+    .mini-action-btn.done {
+      background: var(--success);
+      color: #0b1f14;
+      cursor: default;
+    }
+
+    .intel-reveal {
+      width: 100%;
+      font-size: 0.84rem;
+      color: #9effc8;
+      background: rgba(0, 230, 118, 0.12);
+      padding: 8px 10px;
+      border-radius: 8px;
+      display: none;
+      margin-top: 4px;
+    }
+
+    /* Question & Options */
+    .question-text {
+      font-size: 1.22rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+      line-height: 1.35;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .option-btn {
+      text-align: left;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #fff;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background: rgba(255, 42, 133, 0.22);
+      border-color: var(--pink);
+      transform: translateX(4px);
+    }
+
+    .option-btn:disabled {
+      cursor: default;
+    }
+
+    .option-letter {
+      min-width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: var(--gold);
+    }
+
+    .option-btn.correct {
+      background: rgba(0, 230, 118, 0.22);
+      border-color: var(--success);
+    }
+
+    .option-btn.wrong {
+      background: rgba(255, 59, 92, 0.22);
+      border-color: var(--danger);
+    }
+
+    .feedback-box {
+      display: none;
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .feedback-box.correct {
+      display: block;
+      background: rgba(0, 230, 118, 0.14);
+      border: 1px solid var(--success);
+      color: #d7ffe9;
+    }
+
+    .feedback-box.wrong {
+      display: block;
+      background: rgba(255, 59, 92, 0.14);
+      border: 1px solid var(--danger);
+      color: #ffd6de;
+    }
+
+    /* Result Screen */
+    .result-card {
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    .mission-stamp {
+      display: inline-block;
+      font-size: 1.6rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 8px 20px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+    }
+
+    .stamp-passed {
+      color: var(--gold);
+      border: 3px solid var(--gold);
+      background: rgba(255, 206, 84, 0.15);
+      box-shadow: 0 0 25px rgba(255, 206, 84, 0.35);
+    }
+
+    .stamp-wasted {
+      color: var(--danger);
+      border: 3px solid var(--danger);
+      background: rgba(255, 59, 92, 0.15);
+      box-shadow: 0 0 25px rgba(255, 59, 92, 0.35);
+    }
+
+    .score-circle {
+      width: 140px;
+      height: 140px;
+      margin: 12px auto 18px;
+      border-radius: 50%;
+      background: conic-gradient(var(--pink) calc(var(--pct) * 1%), rgba(255,255,255,0.12) 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .score-circle::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border-radius: 50%;
+      background: #1a0b2e;
+    }
+
+    .score-inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .score-percent {
+      font-size: 1.9rem;
+      font-weight: 900;
+      color: #fff;
+      display: block;
+    }
+
+    .score-sub {
+      font-size: 0.8rem;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .result-summary {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .stats-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .stat-box span {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-box strong {
+      font-size: 1.15rem;
+      color: var(--cyan);
+    }
+
+    @media (max-width: 540px) {
+      .hero-banner h1 { font-size: 1.55rem; }
+      .stats-summary-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="palm-bg"></div>
+
+  <main class="app-container">
+    <!-- Top HUD -->
+    <header class="hud-bar">
+      <div class="brand">
+        <div class="badge-vi">VI</div>
+        <div class="brand-title">Vice City &amp; Leonida Quest</div>
+      </div>
+      <div class="hud-stats">
+        <div class="stat-pill">💵 <span id="cashDisplay">$0</span></div>
+        <div class="stat-pill">Рівень розшуку: <span class="stars" id="wantedDisplay">☆☆☆☆☆</span></div>
+        <button class="sound-btn" id="soundToggle" type="button">🔊 Звук: УВІМК</button>
+      </div>
+    </header>
+
+    <!-- START SCREEN -->
+    <section id="startScreen" class="screen active">
+      <div class="hero-banner">
+        <h1>Ласкаво просимо до Леоніди</h1>
+        <p>Пройди 5 сюжетних епізодів по світу Grand Theft Auto VI. Використовуй інтерактивні гаджети на місці подій, приймай рішення під тиском поліції та зароби репутацію легенди Вайс-Сіті.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-box">
+          <strong>🎲 Динамічний рандом</strong>
+          <span>Усі варіанти відповідей перемішуються під час кожного запуску місії.</span>
+        </div>
+        <div class="feature-box">
+          <strong>🕹️ Фрагменти гри</strong>
+          <span>Зламуй камери, скануй радіоефір і перевіряй багажник перед вибором.</span>
+        </div>
+        <div class="feature-box">
+          <strong>🔊 Синтезатор звуку</strong>
+          <span>Вбудовані Web Audio ефекти: сирени, готівка, успіх і провал місії.</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="startBtn" type="button">▶ Розпочати місію</button>
+    </section>
+
+    <!-- QUIZ SCREEN -->
+    <section id="quizScreen" class="screen">
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span id="stepCounter">Епізод 1 з 5</span>
+          <span id="locationTag">📍 Ocean Drive, Vice City</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <div class="scene-box">
+        <div class="scene-tag" id="sceneTitle">ФРАГМЕНТ ГРИ #1</div>
+        <p class="scene-story" id="sceneStory"></p>
+
+        <div class="interactive-pad">
+          <span class="interactive-label" id="gadgetPrompt">🛠️ Інтерактивна дія:</span>
+          <button class="mini-action-btn" id="gadgetBtn" type="button">Активувати</button>
+          <div class="intel-reveal" id="intelReveal"></div>
+        </div>
+      </div>
+
+      <h2 class="question-text" id="questionText"></h2>
+      <div class="options-list" id="optionsList"></div>
+      <div class="feedback-box" id="feedbackBox"></div>
+
+      <button class="btn-primary" id="nextBtn" type="button" style="display: none;">Далі по сюжету ➔</button>
+    </section>
+
+    <!-- RESULT SCREEN -->
+    <section id="resultScreen" class="screen">
+      <div class="result-card">
+        <div class="mission-stamp" id="missionStamp">MISSION PASSED!</div>
+
+        <div class="score-circle" id="scoreCircle" style="--pct: 0;">
+          <div class="score-inner">
+            <span class="score-percent" id="successPercent">0%</span>
+            <span class="score-sub">УСПІХ МІСІЇ</span>
+          </div>
+        </div>
+
+        <p class="result-summary" id="resultSummary"></p>
+
+        <div class="stats-summary-grid">
+          <div class="stat-box">
+            <span>Правильних відповідей</span>
+            <strong id="correctCountText">0 / 5</strong>
+          </div>
+          <div class="stat-box">
+            <span>Зароблено кешу</span>
+            <strong id="finalCashText">$0</strong>
+          </div>
+          <div class="stat-box">
+            <span>Статус у Леоніді</span>
+            <strong id="rankText">Новачок</strong>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="restartBtn" type="button">↻ Зіграти ще раз (перемішати відповіді)</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // --- Web Audio API Sound Synthesizer (No external files needed for GitHub) ---
+    class SoundFX {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type, duration, delay = 0, vol = 0.15) {
+        if (!this.enabled) return;
+        this.init();
+        const now = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      click() {
+        this.playTone(520, 'triangle', 0.08, 0, 0.12);
+      }
+
+      gadget() {
+        this.playTone(320, 'sine', 0.1, 0, 0.12);
+        this.playTone(640, 'sine', 0.15, 0.08, 0.14);
+        this.playTone(960, 'triangle', 0.2, 0.16, 0.12);
+      }
+
+      correct() {
+        this.playTone(523.25, 'triangle', 0.14, 0, 0.16);
+        this.playTone(659.25, 'triangle', 0.14, 0.1, 0.16);
+        this.playTone(783.99, 'triangle', 0.28, 0.2, 0.18);
+      }
+
+      wrong() {
+        this.playTone(220, 'sawtooth', 0.22, 0, 0.14);
+        this.playTone(155, 'sawtooth', 0.35, 0.15, 0.14);
+      }
+
+      missionPassed() {
+        const notes = [392, 493.88, 587.33, 783.99, 987.77];
+        notes.forEach((n, i) => this.playTone(n, 'triangle', 0.25, i * 0.11, 0.16));
+      }
+
+      missionFailed() {
+        const notes = [300, 260, 210, 140];
+        notes.forEach((n, i) => this.playTone(n, 'sawtooth', 0.3, i * 0.16, 0.15));
+      }
+    }
+
+    const sfx = new SoundFX();
+
+    // --- Quest Database (5 Questions) ---
+    const questData = [
+      {
+        location: "📍 Ocean Drive, Vice City",
+        sceneTitle: "ФРАГМЕНТ 1: БОННІ І КЛАЙД СУЧАСНОСТІ",
+        story: "Неонові вогні нічного клубу відбиваються на капоті твого спорткара. Напарниця Люсія перевіряє рацію перед першою справою в новому штаті.",
+        gadgetPrompt: "📡 Сканувати поліцейську частоту:",
+        gadgetBtnText: "Перехопити сигнал",
+        intelText: "ПЕРЕХОПЛЕННЯ: Патрулі штату Леоніда посилили контроль узбережжя біля Вайс-Сіті.",
+        question: "У якому вигаданому штаті США розгортаються події гри GTA VI?",
+        options: [
+          { text: "Леоніда (Leonida)", correct: true },
+          { text: "Сан-Андреас (San Andreas)", correct: false },
+          { text: "Ліберті (Liberty)", correct: false },
+          { text: "Вайс-Стейт (Vice State)", correct: false }
+        ],
+        explanation: "Події GTA VI відбуваються у штаті Леоніда (натхненному Флоридою), де розташований оновлений Вайс-Сіті."
+      },
+      {
+        location: "📍 Мотель на околиці Вайс-Сіті",
+        sceneTitle: "ФРАГМЕНТ 2: ДОВІРА — ЄДИНИЙ ШАНС",
+        story: "Ви з напарником ділите награбоване на ліжку в дешевому мотелі. Попереду небезпечний рейд, і ви маєте діяти як єдине ціле.",
+        gadgetPrompt: "🗂️ Відкрити досьє напарників:",
+        gadgetBtnText: "Перевірити досьє",
+        intelText: "ДОСЬЄ: Вперше в серії GTA головною героїнею є жінка — Люсія, яка діє в дуеті з напарником.",
+        question: "Як звати головного чоловічого персонажа, який є напарником Люсії в GTA VI?",
+        options: [
+          { text: "Джейсон (Jason)", correct: true },
+          { text: "Томмі Версетті (Tommy Vercetti)", correct: false },
+          { text: "Ніко Беллік (Niko Bellic)", correct: false },
+          { text: "Тревор Філіпс (Trevor Philips)", correct: false }
+        ],
+        explanation: "Головний дует протагоністів GTA VI — це Люсія та Джейсон."
+      },
+      {
+        location: "📍 Болота Grassrivers",
+        sceneTitle: "ФРАГМЕНТ 3: ВІДХІД ЧЕРЕЗ МАНГРОВІ ЗАРОСТІ",
+        story: "Гелікоптер новин висить над головою. Щоб відірватися від погоні, ти звертаєш із шосе прямо в дикі болота на аероглісері.",
+        gadgetPrompt: "🔭 Увімкнути тепловізор дрона:",
+        gadgetBtnText: "Оглянути місцевість",
+        intelText: "ТЕПЛОВІЗОР: У воді зафіксовано великих рептилій, а на суші — фламінго та єнотів.",
+        question: "Який транспорт ідеально підходить для швидкого пересування мілководдям і болотами Леоніди в трейлері GTA VI?",
+        options: [
+          { text: "Аероглісер (Airboat)", correct: true },
+          { text: "Підводний човен Kosatka", correct: false },
+          { text: "Реактивний ранець Thruster", correct: false },
+          { text: "Снігохід", correct: false }
+        ],
+        explanation: "Аероглісер (човен із великим пропелером ззаду) створений спеціально для болотистих районів, схожих на Еверглейдс."
+      },
+      {
+        location: "📍 Стрічка соцмереж Леоніди",
+        sceneTitle: "ФРАГМЕНТ 4: ВІРУСНА СЛАВА",
+        story: "Після гучного пограбування твій телефон розривається від сповіщень — перехожі зняли твою втечу на вертикальне відео.",
+        gadgetPrompt: "📱 Відкрити стрічку новин у смартфоні:",
+        gadgetBtnText: "Переглянути тренди",
+        intelText: "ТРЕНД #1: Прямі ефіри з божевільними трюками на дахах авто набирають мільйони переглядів.",
+        question: "Яка сучасна механіка соціального життя яскраво представлена у світі GTA VI?",
+        options: [
+          { text: "Внутрішньоігрова платформа вертикальних відео та стрімів", correct: true },
+          { text: "Лише паперові газети у кіосках", correct: false },
+          { text: "Пошта голубами між районами", correct: false },
+          { text: "Тільки пейджери без екрана", correct: false }
+        ],
+        explanation: "У GTA VI велика увага приділена соцмережам, вірусним кліпам та прямим трансляціям мешканців штату."
+      },
+      {
+        location: "📍 Автомагістраль Vice Beach",
+        sceneTitle: "ФРАГМЕНТ 5: ОСТАННІЙ РИВОК",
+        story: "Сейф у багажнику, попереду блокпост. Час згадати, хто стоїть за створенням цієї масштабної кримінальної саги.",
+        gadgetPrompt: "📻 Перевірити ліцензію на бортовому комп'ютері:",
+        gadgetBtnText: "Зчитати дані",
+        intelText: "СИСТЕМА: Легендарна студія-розробник відкритих світів та серії Red Dead Redemption.",
+        question: "Яка студія є розробником Grand Theft Auto VI?",
+        options: [
+          { text: "Rockstar Games", correct: true },
+          { text: "CD Projekt Red", correct: false },
+          { text: "Ubisoft Montreal", correct: false },
+          { text: "Naughty Dog", correct: false }
+        ],
+        explanation: "GTA VI розробляється студією Rockstar Games."
+      }
+    ];
+
+    // --- State ---
+    let currentIndex = 0;
+    let correctAnswers = 0;
+    let cash = 0;
+    let wantedLevel = 1;
+    let answeredCurrent = false;
+
+    // --- DOM Elements ---
+    const startScreen = document.getElementById('startScreen');
+    const quizScreen = document.getElementById('quizScreen');
+    const resultScreen = document.getElementById('resultScreen');
+
+    const cashDisplay = document.getElementById('cashDisplay');
+    const wantedDisplay = document.getElementById('wantedDisplay');
+    const soundToggle = document.getElementById('soundToggle');
+
+    const stepCounter = document.getElementById('stepCounter');
+    const locationTag = document.getElementById('locationTag');
+    const progressFill = document.getElementById('progressFill');
+    const sceneTitle = document.getElementById('sceneTitle');
+    const sceneStory = document.getElementById('sceneStory');
+    const gadgetPrompt = document.getElementById('gadgetPrompt');
+    const gadgetBtn = document.getElementById('gadgetBtn');
+    const intelReveal = document.getElementById('intelReveal');
+    const questionText = document.getElementById('questionText');
+    const optionsList = document.getElementById('optionsList');
+    const feedbackBox = document.getElementById('feedbackBox');
+    const nextBtn = document.getElementById('nextBtn');
+
+    // --- Helper: Fisher-Yates Shuffle ---
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function updateHUD() {
+      cashDisplay.textContent = `$${cash.toLocaleString('en-US')}`;
+      const clampedWanted = Math.max(0, Math.min(5, wantedLevel));
+      wantedDisplay.textContent = '★'.repeat(clampedWanted) + '☆'.repeat(5 - clampedWanted);
+    }
+
+    function showScreen(screen) {
+      [startScreen, quizScreen, resultScreen].forEach(s => s.classList.remove('active'));
+      screen.classList.add('active');
+    }
+
+    // --- Sound Toggle ---
+    soundToggle.addEventListener('click', () => {
+      sfx.enabled = !sfx.enabled;
+      soundToggle.textContent = sfx.enabled ? '🔊 Звук: УВІМК' : '🔇 Звук: ВИМК';
+      if (sfx.enabled) sfx.click();
+    });
+
+    // --- Start Game ---
+    function startGame() {
+      sfx.click();
+      currentIndex = 0;
+      correctAnswers = 0;
+      cash = 5000;
+      wantedLevel = 1;
+      updateHUD();
+      showScreen(quizScreen);
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      answeredCurrent = false;
+      const item = questData[currentIndex];
+
+      stepCounter.textContent = `Епізод ${currentIndex + 1} з ${questData.length}`;
+      locationTag.textContent = item.location;
+      progressFill.style.width = `${((currentIndex + 1) / questData.length) * 100}%`;
+
+      sceneTitle.textContent = item.sceneTitle;
+      sceneStory.textContent = item.story;
+
+      // Reset interactive mini-fragment
+      gadgetPrompt.textContent = item.gadgetPrompt;
+      gadgetBtn.textContent = item.gadgetBtnText;
+      gadgetBtn.classList.remove('done');
+      gadgetBtn.disabled = false;
+      intelReveal.style.display = 'none';
+      intelReveal.textContent = item.intelText;
+
+      gadgetBtn.onclick = () => {
+        sfx.gadget();
+        gadgetBtn.textContent = '✓ Активовано';
+        gadgetBtn.classList.add('done');
+        gadgetBtn.disabled = true;
+        intelReveal.style.display = 'block';
+        cash += 2500;
+        updateHUD();
+      };
+
+      questionText.textContent = item.question;
+      feedbackBox.className = 'feedback-box';
+      feedbackBox.textContent = '';
+      nextBtn.style.display = 'none';
+
+      // Shuffle options every time
+      const shuffledOptions = shuffleArray(item.options);
+      const letters = ['A', 'B', 'C', 'D'];
+      optionsList.innerHTML = '';
+
+      shuffledOptions.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'option-btn';
+        btn.innerHTML = `<span class="option-letter">${letters[idx]}</span><span>${opt.text}</span>`;
+        btn.addEventListener('click', () => handleAnswer(btn, opt.correct, shuffledOptions, item.explanation));
+        optionsList.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(selectedBtn, isCorrect, allShuffled, explanation) {
+      if (answeredCurrent) return;
+      answeredCurrent = true;
+
+      const buttons = optionsList.querySelectorAll('.option-btn');
+      buttons.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (allShuffled[idx].correct) {
+          btn.classList.add('correct');
+        }
+      });
+
+      if (isCorrect) {
+        sfx.correct();
+        correctAnswers++;
+        cash += 25000;
+        wantedLevel = Math.max(0, wantedLevel - 1);
+        feedbackBox.className = 'feedback-box correct';
+        feedbackBox.innerHTML = `<strong>✅ Влучно! (+$25,000)</strong><br>${explanation}`;
+      } else {
+        sfx.wrong();
+        selectedBtn.classList.add('wrong');
+        wantedLevel = Math.min(5, wantedLevel + 1);
+        feedbackBox.className = 'feedback-box wrong';
+        feedbackBox.innerHTML = `<strong>🚨 Помилка! (+1 зірка розшуку)</strong><br>${explanation}`;
+      }
+
+      updateHUD();
+      nextBtn.textContent = currentIndex === questData.length - 1 ? 'Завершити місію 🏁' : 'Далі по сюжету ➔';
+      nextBtn.style.display = 'block';
+    }
+
+    nextBtn.addEventListener('click', () => {
+      sfx.click();
+      currentIndex++;
+      if (currentIndex < questData.length) {
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    function showResults() {
+      showScreen(resultScreen);
+      const total = questData.length;
+      const successRate = Math.round((correctAnswers / total) * 100);
+
+      document.getElementById('scoreCircle').style.setProperty('--pct', successRate);
+      document.getElementById('successPercent').textContent = `${successRate}%`;
+      document.getElementById('correctCountText').textContent = `${correctAnswers} з ${total}`;
+      document.getElementById('finalCashText').textContent = `$${cash.toLocaleString('en-US')}`;
+
+      const stamp = document.getElementById('missionStamp');
+      const rankText = document.getElementById('rankText');
+      const summary = document.getElementById('resultSummary');
+
+      if (successRate >= 60) {
+        sfx.missionPassed();
+        stamp.textContent = 'MISSION PASSED!';
+        stamp.className = 'mission-stamp stamp-passed';
+      } else {
+        sfx.missionFailed();
+        stamp.textContent = 'BUSTED / WASTED';
+        stamp.className = 'mission-stamp stamp-wasted';
+      }
+
+      if (successRate === 100) {
+        rankText.textContent = 'Бос Вайс-Сіті';
+        summary.textContent = 'Ідеальне проходження! Ти знаєш кожен куточок Леоніди, обійшов усі пастки копів і зірвав максимальний куш.';
+      } else if (successRate >= 60) {
+        rankText.textContent = 'Профі Леоніди';
+        summary.textContent = 'Справу зроблено! Було кілька гарячих моментів на дорозі, але ти довів місію до успішного фіналу.';
+      } else {
+        rankText.textContent = 'Новачок на районі';
+        summary.textContent = 'Поліція виявилася швидшою цього разу. Спробуй ще раз і не забувай використовувати інтерактивні підказки!';
+      }
+    }
+
+    document.getElementById('startBtn').addEventListener('click', startGame);
+    document.getElementById('restartBtn').addEventListener('click', startGame);
+  </script>
+</body>
+</html>
